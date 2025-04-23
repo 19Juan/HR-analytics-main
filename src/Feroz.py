@@ -50,45 +50,44 @@ def analisis_categorico_categorico(df,lista_num_cat=[]):
     plt.tight_layout()
     plt.show()
 
-def columnas_numericas(df,columnas_excluidas=[]):
-    columnas_numericas = []
-    for column in df.columns:
-        if df[column].dtype in ['int64','float64']:
-            if column not in columnas_excluidas:
-                columnas_numericas.append(column)  
-    return columnas_numericas
+def columnas_numericas(df, columnas_excluidas=[]):
+    """Helper function to get numerical columns, excluding specified ones."""
+    numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    return [col for col in numerical_cols if col not in columnas_excluidas]
 
-def analisis_numerico_numerico(df,y,columnas_excluidas=[],limites=[]):
-    col_num = columnas_numericas(df,columnas_excluidas)
-    if df[y].dtype not in ['int64','float64']:
+def analisis_numerico_numerico(df, y, columnas_excluidas=[], limites=[]):
+    col_num = columnas_numericas(df, columnas_excluidas)
+    if y in col_num and df[y].dtype not in ['int64', 'float64']:
         col_num.remove(y)
-    largo = len(col_num)
-    parte_entera = (largo//2)*2
-    resto = largo%4
-    parte_entera +=2
-    if resto == 0:
-        parte_entera-=2
-    num_de_gridspec = math.ceil(parte_entera/2)
-    lista_hr = [5,1]*num_de_gridspec
-    fig, axis = plt.subplots(parte_entera,2,figsize=(10,10),gridspec_kw={"height_ratios":lista_hr})
 
-    for column in col_num:
-        fila = (col_num.index(column)//2)*2
-        columna = col_num.index(column)%2
-        if len(limites)>0:
-            if 0<= col_num.index(column)*2 < len(limites):
-                if limites[col_num.index(column)*2] != None:
-                    sns.histplot(ax=axis[fila,columna],data=df,x=column).set(xlim=(limites[col_num.index(column)*2],limites[col_num.index(column)*2+1]))
-                    sns.boxplot(ax=axis[fila+1,columna],data=df,x=column).set(xlim=(limites[col_num.index(column)*2],limites[col_num.index(column)*2+1]))
-                else:
-                    sns.histplot(ax=axis[fila,columna],data=df,x=column)
-                    sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
+    num_variables = len(col_num)
+    num_filas = num_variables * 2  # Dos filas por cada variable (histplot y boxplot)
+
+    fig, axis = plt.subplots(num_filas, 2, figsize=(10, 5 * num_variables)) # Ajustar altura de la figura
+
+    for i, column in enumerate(col_num):
+        fila_hist = i * 2
+        fila_box = i * 2 + 1
+        columna = 0  # Siempre en la primera columna para histplot y boxplot vertical
+
+        if len(limites) > 0 and 0 <= i * 2 < len(limites):
+            xlim = (limites[i * 2], limites[i * 2 + 1]) if limites[i * 2] is not None else None
+            if xlim:
+                sns.histplot(ax=axis[fila_hist, columna], data=df, x=column).set(xlim=xlim)
+                sns.boxplot(ax=axis[fila_box, columna], data=df, x=column).set(xlim=xlim)
+                sns.histplot(ax=axis[fila_hist, columna + 1], data=df, y=column).set(ylim=xlim) # Histplot vertical
+                sns.boxplot(ax=axis[fila_box, columna + 1], data=df, y=column).set(ylim=xlim)   # Boxplot vertical
             else:
-                sns.histplot(ax=axis[fila,columna],data=df,x=column)
-                sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
+                sns.histplot(ax=axis[fila_hist, columna], data=df, x=column)
+                sns.boxplot(ax=axis[fila_box, columna], data=df, x=column)
+                sns.histplot(ax=axis[fila_hist, columna + 1], data=df, y=column) # Histplot vertical
+                sns.boxplot(ax=axis[fila_box, columna + 1], data=df, y=column)   # Boxplot vertical
         else:
-            sns.histplot(ax=axis[fila,columna],data=df,x=column)
-            sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
+            sns.histplot(ax=axis[fila_hist, columna], data=df, x=column)
+            sns.boxplot(ax=axis[fila_box, columna], data=df, x=column)
+            sns.histplot(ax=axis[fila_hist, columna + 1], data=df, y=column) # Histplot vertical
+            sns.boxplot(ax=axis[fila_box, columna + 1], data=df, y=column)   # Boxplot vertical
+
     plt.tight_layout()
     plt.show()
 
