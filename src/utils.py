@@ -83,12 +83,9 @@ def analisis_numerico_numerico(df,y,columnas_excluidas=[],limites=[]):
                 else:
                     sns.histplot(ax=axis[fila,columna],data=df,x=column)
                     sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
-            else:
-                sns.histplot(ax=axis[fila,columna],data=df,x=column)
-                sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
-        else:
-            sns.histplot(ax=axis[fila,columna],data=df,x=column)
-            sns.boxplot(ax=axis[fila+1,columna],data=df,x=column)
+
+        
+        
     plt.tight_layout()
     plt.show()
 
